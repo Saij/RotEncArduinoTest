@@ -3,12 +3,12 @@
 
 #include <Arduino.h>
 
-#define BUTTON_STATE_UP     0x01
-#define BUTTON_STATE_DOWN   0x00
+#define BUTTON_STATE_UP     0x00
+#define BUTTON_STATE_DOWN   0x01
 
-#define TURN_STATE_NONE     0
-#define TURN_STATE_CW       1
-#define TURN_STATE_CCW      2
+#define TURN_STATE_NONE     0x00
+#define TURN_STATE_CW       0x01
+#define TURN_STATE_CCW      0x02
 
 extern void setupRotEnc();
 extern void updateRotEnc();
