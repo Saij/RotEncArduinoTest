@@ -10,9 +10,10 @@
 #define TURN_STATE_CW       1
 #define TURN_STATE_CCW      2
 
-void setupRotEnc();
-void updateRotEnc();
-uint8_t getButtonState();
-uint8_t getTurnState();
+extern void setupRotEnc();
+extern void updateRotEnc();
+
+extern uint8_t button_state;
+extern uint8_t turn_state;
 
 #endif // __BUTTON_HANDLER_H__
