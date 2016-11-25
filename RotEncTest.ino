@@ -1,14 +1,33 @@
 #include "debug.h"
-#include "rotenc.h"
+#include "encoder.h"
 
 void setup() {
+  pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);
+  
   setupDebug();
-  setupRotEnc();
+  encInit();
 }
 
 void loop() {
-  updateRotEnc();
+  encPoll();
+  unsigned char encstate = encGetState();
+  unsigned char btn = encGetButtonState();
 
-  if (button_state != 0 || turn_state != 0)
-    debugPrintf(F("Button State: %d\tTurn State: %d"), button_state, turn_state);
+  if (SPIN_CCW == encstate) {
+    debugPrintf(F("SPIN_CCW"));
+    digitalWrite(8, HIGH);
+    delay(10);
+    digitalWrite(8, LOW);
+  } else if (SPIN_CW == encstate) {
+    debugPrintf(F("SPIN_CW"));
+    digitalWrite(8, HIGH);
+    delay(10);
+    digitalWrite(8, LOW);
+  } else if (btn) {
+    debugPrintf(F("BTN"));
+    digitalWrite(8, HIGH);
+    delay(10);
+    digitalWrite(8, LOW);
+  }
 }
