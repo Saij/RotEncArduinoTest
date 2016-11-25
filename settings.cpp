@@ -1,8 +1,9 @@
 #include "settings.h"
 #include "debug.h"
-#include <EEPROMex.h>
 
 #define NUM_REGISTERS 5
+
+#define EEPROM_SIZE_ATMEGA328 1024  
 
 #define MAGIC_CODE  0x554B
 #define VERSION     0x0001
@@ -11,8 +12,8 @@
 #define MASK_MOD      0xFF00
 
 uint8_t var_size          = ((NUM_REGISTERS << 1) | 1);
-uint8_t buffer_len        = (EEPROMSizeATmega328 / var_size);
-uint8_t addr_status_buffer = EEPROMSizeATmega328 - buffer_len;
+uint8_t buffer_len        = (EEPROM_SIZE_ATMEGA328 / var_size);
+uint8_t addr_status_buffer = EEPROM_SIZE_ATMEGA328 - buffer_len;
 
 uint16_t settings[NUM_REGISTERS] = {
   MAGIC_CODE,
@@ -34,8 +35,8 @@ uint16_t _settingsFindNextWriteIndex() {
           prev_index = i - 1;
         }
 
-      uint8_t prev_elem = EEPROM.readByte(prev_index);
-      uint8_t curr_elem = EEPROM.readByte(i);
+      uint8_t prev_elem = eeprom_read_byte(prev_index);
+      uint8_t curr_elem = eeprom_read_byte(i);
 
       // Must truncate the addition because the index tracking relies of wrap around
       if (((prev_elem + 1) & 0xFF) != curr_elem) {
@@ -57,14 +58,17 @@ void _settingsLoad() {
 
   debugPrintf(F("\tRead Address: %04X"), addr_read);
 
-  uint16_t magic_code = EEPROM.readInt(addr_read);
-  uint16_t version = EEPROM.readInt(addr_read + 0x02);
+  uint16_t magic_code = eeprom_read_word(addr_read);
+  uint16_t version = eeprom_read_word(addr_read + 0x02);
 
   debugPrintf(F("\tMagic Code: %04X\n\tVersion: %04X"), magic_code, version);
 
   if (magic_code == settings[REGISTER_MAGIC] && version == settings[REGISTER_VERSION]) {
     debugPrintf(F("\tLoading settings"));
-    EEPROM.readBlock<uint16_t>(addr_read, settings, NUM_REGISTERS);
+
+    for (uint8_t i = 0; i < NUM_REGISTERS; i++) {
+      eeprom_read_block((void*)&settings[i], (const void*)(addr_read + i * sizeof(uint16_t)), sizeof(settings[i]));
+    }
   }
 }
 
@@ -72,7 +76,9 @@ void _settingsSave() {
   uint16_t write_offset = _settingsFindNextWriteIndex();
   debugPrintf(F("\tWrite Offset: %04X"), write_offset);
 
-  EEPROM.updateBlock<uint16_t>(write_offset * var_size, settings, NUM_REGISTERS);
+  for (uint8_t reg = 0; reg < NUM_REGISTERS; reg++) {
+    eeprom_update_word((write_offset * var_size) + (reg * sizeof(uint16_t)), settings[reg]);
+  }
 
   // Update status buffer 
   uint16_t curr_index = addr_status_buffer + write_offset;
@@ -85,9 +91,8 @@ void _settingsSave() {
     prev_index = curr_index - 1;
   }
 
-  uint16_t sb_val = EEPROM.readByte(prev_index) + 1;
-
-  EEPROM.updateByte(curr_index, sb_val);
+  uint8_t sb_val = eeprom_read_byte(prev_index) + 1;
+  eeprom_update_byte(curr_index, sb_val);
 }
 
 void settingsInit() {

@@ -1,7 +1,7 @@
 #ifndef __SETTINGS_H__
 #define __SETTINGS_H__
 
-#include <Arduino.h>
+#include <stdint.h>
 
 #define REGISTER_MAGIC    0x00
 #define REGISTER_VERSION  0x01

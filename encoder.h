@@ -2,6 +2,7 @@
 #define  __ENCODER_H__
 
 #include <avr/io.h>
+#include <stdint.h>
 
 /*
  * Ports and Pins
@@ -22,8 +23,8 @@
 
 void encInit(void);
 void encPoll(void);
-unsigned char encGetState(void);
-unsigned char encGetButtonState(void);
+uint8_t encGetState(void);
+uint8_t encGetButtonState(void);
 
 #endif // __ENCODER_H__
 
